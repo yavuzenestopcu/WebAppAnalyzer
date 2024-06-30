@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technology Info</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        integrity="sha512-Pfj6BbVvJQgF2mZ7ZhSAHKh+40MSw6Yoc2lB9zZd/DzTcgAwwkG7AENmSK3Ot1ak/SkW/qTgybU69vi2r+Z7Ug=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        #tech-list {
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+
+<body onload="analyzeUrl()">
+    <div id="tech-list">
+        <h2>Detected Technologies</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Icon</th>
+                    <th>Name</th>
+                    <th>Version</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody id="technologies">
+            </tbody>
+        </table>
+    </div>
+    <script>
+        async function analyzeUrl() {
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                });
+                const data = await response.json();
+                const dataJson = JSON.parse(data);
+                displayTechnologies(dataJson.technologies);
+            } catch (error) {
+                console.error('Error analyzing URL:', error);
+            }
+        }
+
+        function displayTechnologies(data) {
+            const techList = document.getElementById('technologies');
+            techList.innerHTML = ''; // Clear previous results
+
+            if (!Array.isArray(data)) {
+                techList.innerHTML = '<tr><td colspan="4">No technologies detected or invalid response.</td></tr>';
+                return;
+            }
+
+            if (data.length === 0) {
+                techList.innerHTML = '<tr><td colspan="4">No technologies detected.</td></tr>';
+                return;
+            }
+
+            data.forEach(tech => {
+                const techItem = document.createElement('tr');
+                techItem.innerHTML = `
+                    <td><img src="icons/${tech.icon}" alt="${tech.name} icon" width="30" height="30"></td>
+                    <td><strong>${tech.name}</strong></td>
+                    <td>${tech.version || 'N/A'}</td>
+                    <td>${tech.categories[0].name}</td>`;
+                techList.appendChild(techItem);
+            });
+        }
+    </script>
+</body>
+
+</html>
